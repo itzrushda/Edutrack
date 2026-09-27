@@ -6,6 +6,7 @@
   <title>EduTrack - Interactive & Animated</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script>
       tailwind.config = {
@@ -41,7 +42,7 @@
       background: linear-gradient(135deg, rgba(255, 255, 255, 0.7), rgba(248, 250, 252, 0.4));
       backdrop-filter: blur(28px);
       -webkit-backdrop-filter: blur(28px);
-      border: 1px solid rgba(226, 232, 240, 0.9);
+      border: 1px solid rgba(123, 30, 60, 0.25);
       box-shadow: 0 20px 40px rgba(30, 41, 59, 0.05), inset 0 1px 2px rgba(255, 255, 255, 1), inset 0 -2px 8px rgba(226, 232, 240, 0.5);
       border-radius: 30px;
       transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
@@ -57,7 +58,7 @@
     .glass-panel:hover {
       transform: translateY(-4px);
       box-shadow: 0 25px 50px rgba(91, 16, 35, 0.08), inset 0 2px 6px rgba(255, 255, 255, 1), inset 0 -2px 12px rgba(226, 232, 240, 0.8);
-      border-color: #FFF;
+      border-color: rgba(123, 30, 60, 0.4);
     }
 
     /* Map glass-card to maroon-glass styling or slightly different crystal glass */
@@ -66,7 +67,7 @@
       backdrop-filter: blur(28px);
       -webkit-backdrop-filter: blur(28px);
       border-radius: 24px;
-      border: 1px solid rgba(226, 232, 240, 1);
+      border: 1px solid rgba(123, 30, 60, 0.25);
       box-shadow: 0 10px 30px rgba(30, 41, 59, 0.04), inset 0 1px 2px rgba(255, 255, 255, 1);
       transition: all 0.3s ease;
     }
@@ -106,7 +107,7 @@
       background: linear-gradient(135deg, rgba(255, 255, 255, 0.8), rgba(248, 250, 252, 0.6));
       backdrop-filter: blur(40px);
       border-radius: 24px;
-      border: 1px solid rgba(226, 232, 240, 0.9);
+      border: 1px solid rgba(123, 30, 60, 0.25);
       box-shadow: 0 25px 50px rgba(30, 41, 59, 0.1);
     }
     
@@ -360,7 +361,7 @@
         <>
           <nav className="flex items-center justify-between px-6 sm:px-8 py-4 glass-nav z-40 relative">
             <div className="flex items-center gap-3">
-              <button className="md:hidden p-2 text-maroon-royal hover:text-maroon-cherry hover:-translate-y-0.5 border border-white/60 rounded-xl transition-all bg-white shadow-sm" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
+              <button className="md:hidden p-2 text-maroon-royal hover:text-maroon-cherry hover:-translate-y-0.5 border border-[#7B1E3C]/25 rounded-xl transition-all bg-white shadow-sm" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
                 <svg width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
               </button>
               <div className="icon-pink-bubble p-2 flex items-center justify-center group cursor-pointer transition-transform hover:scale-105">
@@ -403,7 +404,7 @@
             </div>
           </nav>
           {isMobileMenuOpen && (
-            <div className="md:hidden glass-dropdown border-b border-white/60 px-5 py-4 animate-dropdown absolute w-full z-30 shadow-2xl top-full mt-2 origin-top">
+            <div className="md:hidden glass-dropdown border-b border-white/60 px-5 py-4 animate-dropdown absolute w-full z-50 shadow-2xl left-0 top-[80px] origin-top">
               {navLinks.map((link, idx) => (
                 <button key={link} onClick={() => { playSound('pop'); setActiveTab(link); setIsMobileMenuOpen(false); }} className={`block w-full text-left py-3.5 px-5 rounded-2xl text-[15px] font-black mb-2 transition-all animate-slide-up hover:-translate-y-0.5 ${activeTab === link ? 'bg-white text-maroon-cherry shadow-sm border border-white' : 'text-maroon-royal hover:bg-white/60 border border-transparent'}`} style={{animationDelay: `${idx*0.05}s`}}>
                   {link}
@@ -534,6 +535,26 @@
       const [setupRoll, setSetupRoll] = useState('');
       const [setupSem, setSetupSem] = useState(''); 
       const [setupSubjects, setSetupSubjects] = useState([]);
+      const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
+      const availableAvatars = [
+        'avatars/avatar1.png',
+        'avatars/avatar2.png',
+        'avatars/avatar3.png',
+        'avatars/avatar4.jpg',
+        'avatars/avatar5.jpg',
+        'avatars/avatar6.jpg',
+        'avatars/avatar7.jpg',
+        'avatars/avatar8.jpg',
+        'avatars/avatar9.png',
+        'avatars/avatar10.jpg'
+      ];
+      const handleSelectAvatar = (url) => {
+        const updated = { ...profileData, avatar: url };
+        setProfileData(updated);
+        localStorage.setItem('attendify_student_v6', JSON.stringify(updated));
+        setIsAvatarModalOpen(false);
+        playSound('success');
+      };
 
       const handleNextStep = () => {
         if(!setupName.trim() || !setupRoll.trim() || !setupSem) return alert("Please fill in your Name, Roll No, and select a Semester.");
@@ -610,14 +631,14 @@
                     <h2 className="text-[24px] font-black text-maroon-deep">Select Subjects</h2>
                     <p className="text-[14.5px] font-bold text-maroon-royal mt-1">Semester {setupSem} • Select at least 4</p>
                   </div>
-                  <div className="bg-white/60 border-2 border-white/90 p-3 rounded-2xl mb-6 text-center text-[14px] font-black text-maroon-cherry shadow-sm animate-slide-up" style={{animationDelay: '0.1s'}}>Selected: {setupSubjects.length} subjects</div>
+                  <div className="bg-white/60 border-2 border-[#7B1E3C]/25 p-3 rounded-2xl mb-6 text-center text-[14px] font-black text-maroon-cherry shadow-sm animate-slide-up" style={{animationDelay: '0.1s'}}>Selected: {setupSubjects.length} subjects</div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-[350px] overflow-y-auto custom-scroll pr-2 mb-6">
                     {(globalData.semesterSubjects[setupSem] || []).map((subName, idx) => {
                       const subId = subName.toLowerCase().replace(/[^a-z0-9]/g, '_');
                       const sel = setupSubjects.find(s => s.id === subId);
                       const ui = getSubjectUI();
                       return (
-                        <div key={subId} className={`interactive-card animate-slide-up p-4 rounded-[20px] border-[2px] ${sel ? 'border-maroon-cherry bg-white/80 shadow-[0_4px_15px_rgba(255,77,109,0.2)]' : 'border-white/70 bg-white/50 shadow-sm'}`} style={{animationDelay: `${0.1 + (idx*0.05)}s`}}>
+                        <div key={subId} className={`interactive-card animate-slide-up p-4 rounded-[20px] border-[2px] ${sel ? 'border-maroon-cherry bg-white/80 shadow-[0_4px_15px_rgba(255,77,109,0.2)]' : 'border-[#7B1E3C]/25 bg-white/50 shadow-sm'}`} style={{animationDelay: `${0.1 + (idx*0.05)}s`}}>
                           <div onClick={() => toggleSetupSubject(subId, subName)} className="flex items-center gap-3 cursor-pointer group">
                             <div className={`w-10 h-10 flex items-center justify-center flex-shrink-0 transition-transform group-hover:scale-110 ${sel ? 'icon-pink-bubble' : 'icon-glass-bubble'}`}>{ui.icon}</div>
                             <span className={`text-[13.5px] font-black leading-tight ${sel ? 'text-maroon-cherry' : 'text-maroon-royal'}`}>{subName}</span>
@@ -688,7 +709,7 @@
                               <div className="flex items-center gap-3"><div className="w-10 h-10 icon-glass-bubble flex items-center justify-center group-hover:scale-110 transition-transform">{getSubjectUI().icon}</div><span className="font-black text-[14px] text-maroon-deep leading-tight pr-2">{sub.name}</span></div>
                               <span className="font-black text-[15px] text-white bg-gradient-to-r from-maroon-deep to-maroon-cherry px-3 py-1 rounded-xl shadow-sm border border-[#ff758f] group-hover:scale-105 transition-transform">{pct}%</span>
                             </div>
-                            <div className="w-full bg-white/80 h-[8px] rounded-full overflow-hidden relative border border-white/90 shadow-inner"><div className={`h-full rounded-full absolute left-0 top-0 animate-progress-bar ${pct < 75 && sub.total > 0 ? 'bg-red-500' : 'bg-gradient-to-r from-[#ff4d6d] to-[#5e1026] shadow-[0_0_10px_rgba(255,77,109,0.5)]'}`} style={{ width: `${pct}%` }}></div></div>
+                            <div className="w-full bg-white/80 h-[8px] rounded-full overflow-hidden relative border border-[#7B1E3C]/25 shadow-inner"><div className={`h-full rounded-full absolute left-0 top-0 animate-progress-bar ${pct < 75 && sub.total > 0 ? 'bg-red-500' : 'bg-gradient-to-r from-[#ff4d6d] to-[#5e1026] shadow-[0_0_10px_rgba(255,77,109,0.5)]'}`} style={{ width: `${pct}%` }}></div></div>
                             <div className="mt-3 text-[12px] text-maroon-royal font-black text-right">{sub.present} / {sub.total} classes</div>
                           </div>
                         )
@@ -706,7 +727,7 @@
                         <span className="text-maroon-royal font-bold">Absent: <strong className="text-maroon-cherry font-black text-[16px]">{profileData.stats.absent}</strong></span>
                         <span className="text-maroon-royal font-bold">Total: <strong className="text-maroon-cherry font-black text-[16px]">{profileData.stats.total}</strong></span>
                       </div>
-                      <div className={`text-[13px] font-black px-5 py-3 rounded-2xl inline-block w-full text-center sm:text-left border-2 transition-colors ${profileData.stats.total === 0 ? 'bg-white/80 text-maroon-royal border-white/90' : getOverallPercentage() >= 75 ? 'bg-white/80 text-maroon-cherry border-white/90 shadow-sm' : 'bg-red-100 text-red-600 border-red-200'}`}>
+                      <div className={`text-[13px] font-black px-5 py-3 rounded-2xl inline-block w-full text-center sm:text-left border-2 transition-colors ${profileData.stats.total === 0 ? 'bg-white/80 text-maroon-royal border-[#7B1E3C]/25' : getOverallPercentage() >= 75 ? 'bg-white/80 text-maroon-cherry border-[#7B1E3C]/25 shadow-sm' : 'bg-red-100 text-red-600 border-red-200'}`}>
                         {profileData.stats.total === 0 ? 'No attendance records yet.' : getOverallPercentage() >= 75 ? 'Great! Your attendance is above the required percentage.' : 'Warning: Your attendance is below 75%. Improve to avoid issues.'}
                       </div>
                     </div>
@@ -756,7 +777,7 @@
                         <div className="w-14 h-14 icon-glass-bubble flex items-center justify-center group-hover:scale-110 transition-transform">{getSubjectUI().icon}</div>
                         <div><h3 className="font-black text-maroon-deep text-[16px] group-hover:text-maroon-cherry transition-colors">{sub.name}</h3><p className="text-maroon-royal font-bold text-[13px] mt-1">Present: {sub.present} / {sub.total}</p></div>
                       </div>
-                      <div className={`text-[20px] font-black px-4 py-2 rounded-2xl border-2 shadow-sm bg-white/80 group-hover:scale-110 transition-transform ${pct >= 75 || sub.total === 0 ? 'text-emerald-600 border-white/90' : 'text-red-500 border-red-200'}`}>{pct}%</div>
+                      <div className={`text-[20px] font-black px-4 py-2 rounded-2xl border-2 shadow-sm bg-white/80 group-hover:scale-110 transition-transform ${pct >= 75 || sub.total === 0 ? 'text-emerald-600 border-[#7B1E3C]/25' : 'text-red-500 border-red-200'}`}>{pct}%</div>
                     </div>
                   )
                 })}
@@ -765,12 +786,26 @@
           );
         }
 
-        if (activeTab === 'Reports') {
+        if (activeTab === 'Profile') {
           return (
             <div className="animate-slide-up">
-              <div className="mb-8 border-b-2 border-white/60 pb-5">
-                <h2 className="text-[24px] font-black text-maroon-deep tracking-tight">Exam Eligibility Report</h2>
-                <p className="text-[14px] font-bold text-maroon-royal mt-1">Check if you meet the 75% attendance criteria for upcoming exams.</p>
+              <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 sm:gap-10 mb-10 border-b-2 border-white/60 pb-8">
+                <div className="relative group">
+                  <img src={profileData.avatar || `https://api.dicebear.com/7.x/micah/svg?seed=${profileData.name.replace(/ /g, '')}&backgroundColor=ffd1dc`} className="w-32 h-32 rounded-[30px] object-cover border-[4px] border-white shadow-[0_8px_20px_rgba(94,16,38,0.2)] group-hover:scale-105 group-hover:rotate-3 transition-all duration-300" alt="Profile" />
+                  <button onClick={() => setIsAvatarModalOpen(true)} className="absolute -bottom-3 -right-3 bg-maroon-cherry text-white p-3 rounded-full shadow-lg hover:scale-110 transition-transform"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></button>
+                </div>
+                <div className="text-center sm:text-left flex-1 mt-2 sm:mt-0">
+                  <h2 className="text-[32px] font-black text-maroon-deep tracking-tight">{profileData.name}</h2>
+                  <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3 mt-3">
+                    <span className="bg-white/80 border border-white/60 px-4 py-1.5 rounded-full text-maroon-cherry font-black text-[13px] shadow-sm">Semester {profileData.semester}</span>
+                    <span className="bg-white/80 border border-white/60 px-4 py-1.5 rounded-full text-maroon-cherry font-black text-[13px] shadow-sm">Roll No: {profileData.rollNo}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mb-6">
+                <h3 className="text-[20px] font-black text-maroon-deep tracking-tight">Exam Eligibility Status</h3>
+                <p className="text-[13px] font-bold text-maroon-royal mt-1">Based on the 75% attendance criteria for your enrolled subjects.</p>
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -812,7 +847,10 @@
       };
 
       const customDropdown = (
-        <button onClick={() => { localStorage.removeItem('attendify_student_v6'); window.location.reload(); }} className="w-full text-left px-5 py-3 text-[14px] text-maroon-cherry hover:bg-white/80 flex items-center gap-2 font-black transition-colors"><svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg> Reset Profile Setup</button>
+        <>
+          <button onClick={() => setIsAvatarModalOpen(true)} className="w-full text-left px-5 py-3 text-[14px] text-maroon-royal hover:bg-white/80 flex items-center gap-2 font-black transition-colors border-b border-white/60"><IconUsers /> Change Avatar</button>
+          <button onClick={() => { localStorage.removeItem('attendify_student_v6'); window.location.reload(); }} className="w-full text-left px-5 py-3 text-[14px] text-maroon-cherry hover:bg-white/80 flex items-center gap-2 font-black transition-colors"><svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg> Reset Profile Setup</button>
+        </>
       );
 
       return (
@@ -820,16 +858,30 @@
           <Toast message={toastMsg} onClose={() => setToastMsg('')} />
           <div className="glass-panel w-full max-w-[1200px] overflow-hidden flex flex-col relative z-10 shadow-[0_30px_60px_rgba(94,16,38,0.15)] animate-slide-up">
             <SharedNavbar 
-              navLinks={['Dashboard', 'Attendance', 'Reports']}
+              navLinks={['Dashboard', 'Attendance', 'Profile']}
               activeTab={activeTab} setActiveTab={setActiveTab}
               profileName={profileData.name} profileSubtext={`Roll No: ${profileData.rollNo}`}
-              avatarUrl={`https://api.dicebear.com/7.x/micah/svg?seed=${profileData.name.replace(/ /g, '')}&backgroundColor=ffd1dc`}
+              avatarUrl={profileData.avatar || `https://api.dicebear.com/7.x/micah/svg?seed=${profileData.name.replace(/ /g, '')}&backgroundColor=ffd1dc`}
               onLogout={onLogout} customDropdownItems={customDropdown}
             />
             <div className="p-6 sm:p-10 min-h-[600px]">
               {renderDashboardContent()}
             </div>
           </div>
+          
+          {isAvatarModalOpen && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-maroon-deep/40 backdrop-blur-sm animate-fade-in">
+              <div className="glass-panel p-8 w-full max-w-[500px] animate-slide-up relative">
+                <button onClick={() => setIsAvatarModalOpen(false)} className="absolute top-4 right-4 p-2 text-maroon-royal hover:text-maroon-cherry hover:rotate-90 transition-all"><IconXCircle /></button>
+                <h2 className="text-[20px] font-black text-maroon-deep mb-6 tracking-tight">Select Profile Avatar</h2>
+                <div className="grid grid-cols-3 sm:grid-cols-5 gap-4">
+                  {availableAvatars.map((url, idx) => (
+                    <img key={idx} src={url} onClick={() => handleSelectAvatar(url)} className="w-full aspect-square object-cover rounded-2xl cursor-pointer hover:scale-110 hover:shadow-[0_8px_20px_rgba(255,77,109,0.3)] transition-all border-4 border-transparent hover:border-white" alt="Avatar option" />
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       );
     }
@@ -898,7 +950,7 @@
                   {(globalData.timetable || []).length === 0 ? <p className="text-[14px] font-bold text-maroon-royal">No lectures scheduled for today.</p> : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                       {(globalData.timetable || []).map((tt, idx) => (
-                        <div key={tt.id} className="p-4 border border-white/60 rounded-2xl flex items-center justify-between bg-white/40 interactive-card">
+                        <div key={tt.id} className="p-4 border border-[#7B1E3C]/25 rounded-2xl flex items-center justify-between bg-white/40 interactive-card">
                           <div>
                             <p className="font-black text-maroon-deep text-[16px]">{tt.subject}</p>
                             <p className="text-[13px] font-bold text-maroon-royal mt-1 flex items-center gap-2"><IconClock /> {tt.startTime} - {tt.endTime}</p>
@@ -991,7 +1043,7 @@
                           </td>
                           <td className="px-6 py-4 text-maroon-cherry text-[14.5px] font-black">#{st.roll}</td>
                           <td className="px-6 py-4 text-right">
-                            <span className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-[12px] font-black transition-all duration-300 border-2 shadow-sm ${st.isPresent ? 'bg-white/80 text-maroon-cherry border-white/90 scale-105' : 'bg-white/60 text-maroon-royal border-white/80'}`}>
+                            <span className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-[12px] font-black transition-all duration-300 border-2 shadow-sm ${st.isPresent ? 'bg-white/80 text-maroon-cherry border-[#7B1E3C]/25 scale-105' : 'bg-white/60 text-maroon-royal border-white/80'}`}>
                               {st.isPresent ? <><span className="w-2 h-2 rounded-full bg-maroon-cherry"></span> Present</> : <><span className="w-2 h-2 rounded-full bg-[#a4133c]"></span> Absent</>}
                             </span>
                           </td>
@@ -1006,6 +1058,73 @@
         }
 
         if (activeTab === 'Reports') {
+          const downloadIndividualReport = (st) => {
+            playSound('pop');
+            const pct = Math.round((st.attended / st.totalClasses) * 100);
+            const isEligible = pct >= 75 ? "Eligible for Examination" : "Not Eligible";
+            const subjectName = selectedSubject || 'All Subjects';
+            
+            const reportDiv = document.createElement('div');
+            reportDiv.innerHTML = `
+              <div style="font-family: 'Outfit', sans-serif; padding: 40px; color: #1E293B; max-width: 800px; margin: 0 auto; background: white;">
+                <div style="border-bottom: 3px solid #7B1E3C; padding-bottom: 20px; margin-bottom: 30px; text-align: center;">
+                  <h1 style="color: #7B1E3C; font-size: 32px; margin: 0; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">Attendance Report</h1>
+                  <p style="color: #64748B; font-size: 16px; margin-top: 8px;">EduTrack - College Management System</p>
+                </div>
+                
+                <div style="display: flex; gap: 20px; align-items: center; background: #F8FAFC; padding: 25px; border-radius: 16px; margin-bottom: 30px; border: 1px solid #E2E8F0;">
+                  <img src="${st.avatar}" style="width: 80px; height: 80px; border-radius: 50%; border: 3px solid #7B1E3C; object-fit: cover;" />
+                  <div>
+                    <h2 style="margin: 0; font-size: 24px; color: #7B1E3C; font-weight: 800;">${st.name}</h2>
+                    <p style="margin: 5px 0 0 0; font-size: 16px; font-weight: 600;">Roll No: ${st.roll}</p>
+                    <p style="margin: 5px 0 0 0; font-size: 16px; font-weight: 600;">Department: Computer Science</p>
+                  </div>
+                </div>
+
+                <div style="margin-bottom: 30px;">
+                  <h3 style="color: #7B1E3C; font-size: 20px; margin-bottom: 15px; border-bottom: 2px solid #E2E8F0; padding-bottom: 10px;">Subject-wise Attendance</h3>
+                  <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+                    <thead>
+                      <tr style="background: #F1F5F9;">
+                        <th style="padding: 12px; text-align: left; border: 1px solid #CBD5E1;">Subject</th>
+                        <th style="padding: 12px; text-align: center; border: 1px solid #CBD5E1;">Classes Attended</th>
+                        <th style="padding: 12px; text-align: center; border: 1px solid #CBD5E1;">Total Classes</th>
+                        <th style="padding: 12px; text-align: center; border: 1px solid #CBD5E1;">Percentage</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td style="padding: 12px; border: 1px solid #CBD5E1; font-weight: 600;">${subjectName}</td>
+                        <td style="padding: 12px; text-align: center; border: 1px solid #CBD5E1;">${st.attended}</td>
+                        <td style="padding: 12px; text-align: center; border: 1px solid #CBD5E1;">${st.totalClasses}</td>
+                        <td style="padding: 12px; text-align: center; border: 1px solid #CBD5E1; font-weight: 800; color: ${pct >= 75 ? '#059669' : '#DC2626'}">${pct}%</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <div style="background: ${pct >= 75 ? '#ECFDF5' : '#FEF2F2'}; border: 2px solid ${pct >= 75 ? '#10B981' : '#EF4444'}; padding: 20px; border-radius: 12px; text-align: center;">
+                  <h3 style="margin: 0 0 10px 0; font-size: 20px; color: ${pct >= 75 ? '#047857' : '#B91C1C'}">Final Eligibility Status</h3>
+                  <p style="margin: 0; font-size: 18px; font-weight: 700; color: ${pct >= 75 ? '#059669' : '#DC2626'}">${isEligible}</p>
+                </div>
+                
+                <div style="margin-top: 50px; text-align: right;">
+                  <p style="border-top: 1px solid #CBD5E1; display: inline-block; padding-top: 10px; width: 200px; text-align: center; font-weight: 600; color: #64748B;">Authorized Signature</p>
+                </div>
+              </div>
+            `;
+            
+            const opt = {
+              margin:       0.5,
+              filename:     `Attendance_Report_${st.name.replace(/\s+/g, '_')}_${subjectName.replace(/\s+/g, '_')}.pdf`,
+              image:        { type: 'jpeg', quality: 0.98 },
+              html2canvas:  { scale: 2, useCORS: true },
+              jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+            };
+            
+            html2pdf().set(opt).from(reportDiv).save();
+          };
+
           const downloadReport = () => {
             const headers = ["Student Name", "Roll No", "Attended", "Total Classes", "Percentage", "Eligibility"];
             const csvRows = [headers.join(",")];
@@ -1049,7 +1168,8 @@
                         <th className="px-6 py-5 border-r-2 border-white/60">Student Info</th>
                         <th className="px-6 py-5 border-r-2 border-white/60">Roll No</th>
                         <th className="px-6 py-5 text-center border-r-2 border-white/60">Attendance %</th>
-                        <th className="px-6 py-5 text-right">Remarks</th>
+                        <th className="px-6 py-5 text-right border-r-2 border-white/60">Remarks</th>
+                        <th className="px-6 py-5 text-center">Action</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y-2 divide-white/60">
@@ -1071,10 +1191,15 @@
                                 {pct}%
                               </span>
                             </td>
-                            <td className="px-6 py-4 text-right">
-                              <span className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-[12px] font-black shadow-sm border ${isEligible ? 'bg-white/80 text-emerald-600 border-white/90' : 'bg-red-50 text-red-600 border-red-200'}`}>
-                                {isEligible ? <><span className="w-2 h-2 rounded-full bg-emerald-500"></span> Eligible for Exams</> : <><span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span> Not Eligible</>}
+                            <td className="px-6 py-4 text-right border-r-2 border-white/60">
+                              <span className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-[12px] font-black shadow-sm border ${isEligible ? 'bg-white/80 text-emerald-600 border-[#7B1E3C]/25' : 'bg-red-50 text-red-600 border-red-200'}`}>
+                                {isEligible ? <><span className="w-2 h-2 rounded-full bg-emerald-500"></span> Eligible</> : <><span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span> Not Eligible</>}
                               </span>
+                            </td>
+                            <td className="px-6 py-4 text-center">
+                              <button onClick={() => downloadIndividualReport(st)} className="p-2.5 rounded-xl bg-white/60 hover:bg-white text-maroon-cherry hover:text-maroon-deep transition-all shadow-sm border border-[#7B1E3C]/25 hover:scale-110" title="Download Individual Report">
+                                <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                              </button>
                             </td>
                           </tr>
                         );
@@ -1193,7 +1318,7 @@
                 {savedMessage && <div className="mb-6 p-4 bg-emerald-100 border-2 border-emerald-300 text-emerald-700 rounded-2xl text-[14px] font-black shadow-sm animate-slide-up">{savedMessage}</div>}
                 <div className="grid gap-6">
                   {['student', 'teacher', 'admin'].map((roleName, idx) => (
-                    <div key={roleName} className="glass-panel p-6 border-white/80 interactive-card animate-slide-up" style={{animationDelay: `${0.1 + (idx*0.1)}s`}}>
+                    <div key={roleName} className="glass-panel p-6 interactive-card animate-slide-up" style={{animationDelay: `${0.1 + (idx*0.1)}s`}}>
                       <h2 className="text-[13px] font-black uppercase tracking-wider text-maroon-deep mb-5 flex items-center gap-3"><div className="w-2.5 h-2.5 rounded-full bg-maroon-cherry shadow-[0_0_8px_rgba(255,77,109,0.5)]"></div>{roleName} Access</h2>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                         <div><label className="block text-[13px] font-black text-maroon-royal mb-2">Username</label><input type="text" value={localCreds[roleName].username} onChange={(e) => handleChange(roleName, 'username', e.target.value)} className="w-full px-5 py-3 glass-input text-[14px]" /></div>
@@ -1229,7 +1354,7 @@
                 {localTimetable.length === 0 ? <p className="text-[14px] font-bold text-maroon-royal">No lectures scheduled for today.</p> : (
                   <div className="space-y-4 mb-6">
                     {localTimetable.map((tt, idx) => (
-                      <div key={tt.id} className="p-4 border border-white/60 rounded-2xl flex items-center justify-between bg-white/40 animate-slide-up interactive-card" style={{animationDelay: `${idx*0.1}s`}}>
+                      <div key={tt.id} className="p-4 border border-[#7B1E3C]/25 rounded-2xl flex items-center justify-between bg-white/40 animate-slide-up interactive-card" style={{animationDelay: `${idx*0.1}s`}}>
                         <div>
                           <p className="font-black text-maroon-deep text-[16px]">{tt.subject}</p>
                           <p className="text-[13px] font-bold text-maroon-royal mt-1 flex items-center gap-2"><IconClock /> {tt.startTime} - {tt.endTime}</p>
@@ -1258,7 +1383,7 @@
                <div className="glass-card p-8 animate-slide-up" style={{animationDelay: '0.1s'}}>
                  {savedMessage && <div className="mb-6 p-4 bg-emerald-100 border-2 border-emerald-300 text-emerald-700 rounded-2xl text-[14px] font-black shadow-sm animate-slide-up">{savedMessage}</div>}
                  
-                 <div className="mb-8 p-6 glass-panel border-white/80 interactive-card">
+                 <div className="mb-8 p-6 glass-panel interactive-card">
                    <label className="block text-[13px] font-black text-maroon-royal mb-3 uppercase tracking-wide">Select Semester to Edit</label>
                    <select value={selectedSem} onChange={e=>setSelectedSem(e.target.value)} className="w-full sm:w-1/2 px-5 py-3 glass-input text-[14px] cursor-pointer">
                      <option value="1">Semester 1</option><option value="2">Semester 2</option><option value="3">Semester 3</option><option value="4">Semester 4</option><option value="5">Semester 5</option>
@@ -1272,7 +1397,7 @@
                    </h3>
                    <div className="flex flex-wrap gap-3">
                      {currentSubjects.length === 0 ? <span className="text-[14px] font-bold text-maroon-royal">No subjects found for this semester.</span> : currentSubjects.map((sub, idx) => (
-                       <div key={sub} className="bg-white px-4 py-2 rounded-[16px] text-maroon-deep text-[14px] font-black flex items-center gap-3 hover:-translate-y-1 transition-all animate-slide-up shadow-sm border border-white/80" style={{animationDelay: `${0.2 + (idx*0.05)}s`}}>
+                       <div key={sub} className="bg-white px-4 py-2 rounded-[16px] text-maroon-deep text-[14px] font-black flex items-center gap-3 hover:-translate-y-1 transition-all animate-slide-up shadow-sm border border-[#7B1E3C]/25" style={{animationDelay: `${0.2 + (idx*0.05)}s`}}>
                          {sub}
                          <button onClick={() => handleRemoveSubject(sub)} className="text-red-500 hover:text-white hover:bg-red-500 p-1.5 rounded-lg transition-colors ml-1 hover:scale-110"><IconTrash /></button>
                        </div>
@@ -1319,10 +1444,10 @@
                      Assign Subjects
                      <span className="bg-white/90 text-maroon-cherry px-4 py-1.5 rounded-xl text-[12px] font-black shadow-sm border border-white">{tSubs.length} assigned</span>
                    </h3>
-                   <div className="p-6 glass-panel border-white/80 interactive-card">
+                   <div className="p-6 glass-panel interactive-card">
                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-h-[300px] overflow-y-auto custom-scroll pr-3">
                        {allSubjects.map((sub, idx) => (
-                         <label key={sub} className={`flex items-center gap-3 text-[13.5px] font-black cursor-pointer p-4 rounded-[20px] transition-all border-2 animate-slide-up hover:-translate-y-1 ${tSubs.includes(sub) ? 'border-maroon-cherry bg-white text-maroon-deep shadow-sm' : 'border-white/70 bg-white/50 text-maroon-royal hover:bg-white/80 hover:text-maroon-deep'}`} style={{animationDelay: `${0.4 + (idx*0.05)}s`}}>
+                         <label key={sub} className={`flex items-center gap-3 text-[13.5px] font-black cursor-pointer p-4 rounded-[20px] transition-all border-2 animate-slide-up hover:-translate-y-1 ${tSubs.includes(sub) ? 'border-maroon-cherry bg-white text-maroon-deep shadow-sm' : 'border-[#7B1E3C]/25 bg-white/50 text-maroon-royal hover:bg-white/80 hover:text-maroon-deep'}`} style={{animationDelay: `${0.4 + (idx*0.05)}s`}}>
                            <input type="checkbox" checked={tSubs.includes(sub)} onChange={() => {
                              if(tSubs.includes(sub)) setTSubs(tSubs.filter(s => s !== sub));
                              else setTSubs([...tSubs, sub]);
@@ -1424,7 +1549,7 @@
                 <div className="w-14 h-14 bg-red-100 text-red-600 rounded-[20px] flex items-center justify-center mb-6 border-2 border-red-200"><svg width="28" height="28" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
                 <h1 className="text-[24px] font-black text-maroon-deep mb-2">System Error</h1>
                 <p className="text-maroon-royal mb-8 font-bold text-[15px]">A critical error occurred while rendering the page. This is usually caused by outdated data.</p>
-                <div className="bg-white/70 border-2 border-white/90 text-red-600 p-5 rounded-[20px] text-[13px] overflow-auto mb-8 custom-scroll max-h-[150px] font-mono shadow-inner font-black">
+                <div className="bg-white/70 border-2 border-[#7B1E3C]/25 text-red-600 p-5 rounded-[20px] text-[13px] overflow-auto mb-8 custom-scroll max-h-[150px] font-mono shadow-inner font-black">
                   <code>{this.state.error && this.state.error.toString()}</code>
                 </div>
                 <button onClick={() => { localStorage.clear(); window.location.reload(); }} className="btn-contrast px-8 py-3.5 flex items-center gap-3 text-[14px]">
