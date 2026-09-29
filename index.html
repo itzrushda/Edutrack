@@ -1126,25 +1126,118 @@
           };
 
           const downloadReport = () => {
-            const headers = ["Student Name", "Roll No", "Attended", "Total Classes", "Percentage", "Eligibility"];
-            const csvRows = [headers.join(",")];
+            playSound('pop');
+            const subjectName = selectedSubject || 'All Subjects';
             
+            // Build HTML string for Excel
+            let html = `
+              <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+              <head>
+                <meta charset="utf-8" />
+                <style>
+                  table { border-collapse: collapse; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+                  th, td { border: 1px solid #7B1E3C; padding: 12px; text-align: center; font-size: 14px; }
+                  th { background-color: #7B1E3C; color: #FFFFFF; font-weight: bold; font-size: 15px; }
+                  .title { font-size: 26px; font-weight: bold; color: #FFFFFF; text-align: center; background-color: #7B1E3C; }
+                  .subtitle { font-size: 18px; color: #5B1023; text-align: center; font-style: italic; background-color: #fdf2f4; }
+                  .eligible { background-color: #ECFDF5; color: #065F46; font-weight: bold; }
+                  .not-eligible { background-color: #FEF2F2; color: #991B1B; font-weight: bold; }
+                  .summary-header { background-color: #5B1023; color: white; font-weight: bold; font-size: 16px; text-align: center !important; }
+                  .student-name { text-align: left; font-weight: bold; color: #5B1023; }
+                </style>
+              </head>
+              <body>
+                <table>
+                  <colgroup>
+                    <col width="220" />
+                    <col width="120" />
+                    <col width="130" />
+                    <col width="130" />
+                    <col width="140" />
+                    <col width="120" />
+                    <col width="160" />
+                  </colgroup>
+                  <tr>
+                    <td colspan="7" class="title">EduTrack - College Management System</td>
+                  </tr>
+                  <tr>
+                    <td colspan="7" class="subtitle">Complete Attendance Report</td>
+                  </tr>
+                  <tr>
+                    <td colspan="7" style="text-align: center; font-weight: bold; font-size: 15px; background-color: #fdf2f4;">
+                      Subject: ${subjectName} &nbsp;|&nbsp; Date: ${new Date().toLocaleDateString('en-IN')}
+                    </td>
+                  </tr>
+                  <tr><td colspan="7"></td></tr>
+                  <tr>
+                    <th>Student Name</th>
+                    <th>Roll No</th>
+                    <th>Total Present</th>
+                    <th>Total Absent</th>
+                    <th>Total Classes</th>
+                    <th>Percentage</th>
+                    <th>Eligibility Status</th>
+                  </tr>
+            `;
+
+            let eligibleCount = 0;
+            let ineligibleCount = 0;
+
             students.forEach(st => {
               const pct = Math.round((st.attended / st.totalClasses) * 100);
-              const isEligible = pct >= 75 ? "Eligible" : "Not Eligible";
-              csvRows.push(`${st.name},${st.roll},${st.attended},${st.totalClasses},${pct}%,${isEligible}`);
+              const absent = st.totalClasses - st.attended;
+              const isEligible = pct >= 75;
+              
+              if (isEligible) eligibleCount++;
+              else ineligibleCount++;
+
+              const statusClass = isEligible ? 'eligible' : 'not-eligible';
+              const statusText = isEligible ? 'Eligible' : 'Not Eligible';
+
+              html += `
+                  <tr>
+                    <td class="student-name">${st.name}</td>
+                    <td>${st.roll}</td>
+                    <td>${st.attended}</td>
+                    <td>${absent}</td>
+                    <td>${st.totalClasses}</td>
+                    <td style="font-weight: bold; color: ${isEligible ? '#065F46' : '#991B1B'};">${pct}%</td>
+                    <td class="${statusClass}">${statusText}</td>
+                  </tr>
+              `;
             });
-            
-            const csvString = csvRows.join("\n");
-            const blob = new Blob([csvString], { type: 'text/csv' });
+
+            html += `
+                  <tr><td colspan="7"></td></tr>
+                  <tr>
+                    <td colspan="7" class="summary-header">📊 SUMMARY REPORT</td>
+                  </tr>
+                  <tr>
+                    <td colspan="2" style="text-align: right; font-weight: bold;">Total Students:</td>
+                    <td colspan="5" style="text-align: left; font-weight: bold;">${students.length}</td>
+                  </tr>
+                  <tr>
+                    <td colspan="2" style="text-align: right; font-weight: bold;">Total Eligible:</td>
+                    <td colspan="5" style="text-align: left; color: #065F46; font-weight: bold;">${eligibleCount}</td>
+                  </tr>
+                  <tr>
+                    <td colspan="2" style="text-align: right; font-weight: bold;">Total Not Eligible:</td>
+                    <td colspan="5" style="text-align: left; color: #991B1B; font-weight: bold;">${ineligibleCount}</td>
+                  </tr>
+                </table>
+              </body>
+              </html>
+            `;
+
+            const blob = new Blob([html], { type: 'application/vnd.ms-excel' });
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            const subjectName = selectedSubject || 'All_Subjects';
-            a.download = `Attendance_Report_${subjectName.replace(/\s+/g, '_')}.csv`;
+            a.download = `Attendance_Report_${subjectName.replace(/\s+/g, '_')}.xls`;
             a.click();
             window.URL.revokeObjectURL(url);
-            setToastMsg('Report downloaded successfully!');
+            
+            showPopup('Report Downloaded', `Successfully downloaded formatted Excel report for ${subjectName}.`);
           };
 
           return (
