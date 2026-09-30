@@ -417,12 +417,13 @@
     }
 
     // ----- LOGIN SCREEN -----
-    function EduTrackLogin({ onLoginSuccess, credentials }) {
+    function EduTrackLogin({ onLoginSuccess, credentials, onUpdateCredentials }) {
       const [role, setRole] = useState('Student');
       const [username, setUsername] = useState('');
       const [password, setPassword] = useState('');
       const [showPassword, setShowPassword] = useState(false);
       const [error, setError] = useState('');
+      const [isSignUp, setIsSignUp] = useState(false);
 
       const roles = [
         { name: 'Student', icon: <svg className="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg> },
@@ -436,6 +437,23 @@
         const roleKey = role.toLowerCase();
         const storedCreds = credentials[roleKey];
         const inputUser = username.trim();
+        
+        if ((role === 'Student' || role === 'Teacher') && isSignUp) {
+          if (inputUser.length < 3 || password.length < 3) {
+            playSound('error');
+            setError('Username and password must be at least 3 characters.');
+            return;
+          }
+          playSound('success');
+          const newCreds = {
+            ...credentials,
+            [roleKey]: { username: inputUser, password: password }
+          };
+          onUpdateCredentials(newCreds);
+          onLoginSuccess(roleKey);
+          return;
+        }
+
         const savedUser = storedCreds.username.trim();
         const fallbackAdminUser = savedUser === '.\\admin' ? 'admin' : savedUser;
 
@@ -456,13 +474,13 @@
                 <div className="icon-pink-bubble p-3"><IconCalendarCheck /></div>
                 <h1 className="text-[32px] font-black text-maroon-deep tracking-tight">EduTrack</h1>
               </div>
-              <h2 className="text-[22px] font-black text-maroon-deep mb-2 text-center">Welcome back ✨</h2>
-              <p className="text-[14.5px] text-maroon-royal text-center font-bold">Sign in to your account</p>
+              <h2 className="text-[22px] font-black text-maroon-deep mb-2 text-center">{isSignUp && (role === 'Student' || role === 'Teacher') ? 'Join EduTrack ✨' : 'Welcome back ✨'}</h2>
+              <p className="text-[14.5px] text-maroon-royal text-center font-bold">{isSignUp && (role === 'Student' || role === 'Teacher') ? `Create your ${role.toLowerCase()} account` : 'Sign in to your account'}</p>
             </div>
             
             <div className="flex w-full bg-white/40 p-1.5 rounded-[20px] mb-8 relative border border-white/60 shadow-inner">
               {roles.map((r) => (
-                <button key={r.name} type="button" onClick={() => { setRole(r.name); setError(''); setUsername(''); setPassword(''); }} className={`flex-1 flex justify-center items-center gap-2 py-3 text-[14px] font-black transition-all duration-300 rounded-[16px] ${role === r.name ? 'bg-white text-maroon-cherry shadow-sm scale-100' : 'text-maroon-royal hover:text-maroon-deep hover:bg-white/50 scale-95'}`}>
+                <button key={r.name} type="button" onClick={() => { setRole(r.name); setError(''); setUsername(''); setPassword(''); setIsSignUp(false); }} className={`flex-1 flex justify-center items-center gap-2 py-3 text-[14px] font-black transition-all duration-300 rounded-[16px] ${role === r.name ? 'bg-white text-maroon-cherry shadow-sm scale-100' : 'text-maroon-royal hover:text-maroon-deep hover:bg-white/50 scale-95'}`}>
                   {r.icon} {r.name}
                 </button>
               ))}
@@ -494,9 +512,17 @@
                 </div>
               </div>
               <button type="submit" className="w-full btn-contrast font-black py-4 mt-2 flex justify-center items-center text-[15px] group">
-                Sign In 
+                {isSignUp && (role === 'Student' || role === 'Teacher') ? 'Create Account' : 'Sign In'} 
                 <svg className="ml-2 w-[20px] h-[20px] group-hover:translate-x-1 transition-transform duration-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" x2="3" y1="12" y2="12"/></svg>
               </button>
+              {(role === 'Student' || role === 'Teacher') && (
+                <div className="mt-6 text-center text-maroon-royal font-bold text-[13.5px]">
+                  {isSignUp ? "Already have an account?" : "Don't have an account?"}{" "}
+                  <button type="button" onClick={() => { setIsSignUp(!isSignUp); setError(''); }} className="text-maroon-cherry hover:text-maroon-deep underline decoration-2 underline-offset-4">
+                    {isSignUp ? 'Sign In' : 'Sign Up'}
+                  </button>
+                </div>
+              )}
             </form>
           </div>
         </div>
@@ -1622,7 +1648,7 @@
       return (
         <>
           <BackgroundGlow />
-          {screen === 'login' && <EduTrackLogin onLoginSuccess={setScreen} credentials={credentials} />}
+          {screen === 'login' && <EduTrackLogin onLoginSuccess={setScreen} credentials={credentials} onUpdateCredentials={updateCredentials} />}
           {screen === 'student' && <StudentDashboard onLogout={() => setScreen('login')} globalData={globalData} />}
           {screen === 'teacher' && <TeacherDashboard onLogout={() => setScreen('login')} globalData={globalData} />}
           {screen === 'admin' && <AdminDashboard onLogout={() => setScreen('login')} credentials={credentials} onUpdateCredentials={updateCredentials} globalData={globalData} onUpdateGlobalData={updateGlobalData} />}
